@@ -52,4 +52,17 @@ function initReveal(){
   els.forEach(function(el,i){el.classList.add('reveal');el.style.transitionDelay=(i%3)*90+'ms';io.observe(el)});
 }
 function initTracking(){document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a||typeof gtag!=='function')return;var h=a.getAttribute('href')||'';if(h.indexOf('tel:')===0)gtag('event','click_call');else if(h.indexOf('wa.me')>-1)gtag('event','click_whatsapp');else if(h.indexOf('mailto:')===0)gtag('event','click_email')})}
-document.addEventListener('DOMContentLoaded',function(){setYear();initFilters();initLeadForm();initMenu();initPrefill();initHeader();initReveal();initTracking()});
+
+function initLightbox(){
+  var links=[].slice.call(document.querySelectorAll('a[data-lightbox]'));if(!links.length)return;
+  var box=document.createElement('div');box.className='lb';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');
+  box.innerHTML='<button class="x" aria-label="Close">✕</button><button class="pv" aria-label="Previous">‹</button><img alt=""><p></p><button class="nx" aria-label="Next">›</button>';
+  document.body.appendChild(box);var img=box.querySelector('img'),cap=box.querySelector('p'),group=[],i=0;
+  function show(){var a=group[i];img.src=a.getAttribute('href');img.alt=a.dataset.caption||'';cap.textContent=(a.dataset.caption||'')+'  ('+(i+1)+' / '+group.length+')'}
+  function close(){box.classList.remove('open');document.body.style.overflow=''}
+  links.forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();group=links.filter(function(x){return x.dataset.lightbox===a.dataset.lightbox&&x.offsetParent!==null});i=group.indexOf(a);show();box.classList.add('open');document.body.style.overflow='hidden'})});
+  box.querySelector('.x').onclick=close;box.querySelector('.pv').onclick=function(){i=(i-1+group.length)%group.length;show()};box.querySelector('.nx').onclick=function(){i=(i+1)%group.length;show()};
+  box.addEventListener('click',function(e){if(e.target===box)close()});
+  document.addEventListener('keydown',function(e){if(!box.classList.contains('open'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')box.querySelector('.pv').click();if(e.key==='ArrowRight')box.querySelector('.nx').click()});
+}
+document.addEventListener('DOMContentLoaded',function(){initLightbox();setYear();initFilters();initLeadForm();initMenu();initPrefill();initHeader();initReveal();initTracking()});
